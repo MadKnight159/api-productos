@@ -26,19 +26,25 @@ app.get("/api", (req, res) => {
     });
 });
 
-// Asegurar conexión antes de consultar MongoDB
-app.use("/api", async (req, res, next) => {
-    try {
-        await conectarDB();
-        next();
-    } catch (error) {
-        console.error("Error de conexión MongoDB:", error.message);
 
-        res.status(503).json({
-            mensaje: "Base de datos no disponible"
-        });
+// Verificar conexion MongoDB fuera del entorno de pruebas
+if (process.env.NODE_ENV !== "test") {
+  app.use("/api", async (req, res, next) => {
+    try {
+      await conectarDB();
+      next();
+    } catch (error) {
+      console.error(
+        "Error de conexion MongoDB:",
+        error.message
+      );
+
+      res.status(503).json({
+        mensaje: "Base de datos no disponible"
+      });
     }
-});
+  });
+}
 
 // Rutas
 app.use("/api/auth", authRoutes);
